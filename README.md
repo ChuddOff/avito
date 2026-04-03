@@ -1,73 +1,121 @@
-# React + TypeScript + Vite
+# Avito
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Тестовое задание на frontend-стажировку Avito (весенняя волна 2026).
 
-Currently, two official plugins are available:
+Приложение представляет собой личный кабинет продавца с AI-помощником для улучшения объявлений: пользователь может просматривать список своих объявлений, открывать карточку, редактировать её и получать AI-рекомендации для описания и цены.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Что умеет приложение
 
-## React Compiler
+Основной сценарий:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- список объявлений `/ads`
+- просмотр объявления `/ads/:id`
+- редактирование объявления `/ads/:id/edit`
+- редирект `/` → `/ads`
+- поиск, фильтрация, сортировка, пагинация
+- сохранение изменений объявления
+- сохранение черновика в `localStorage`
+- AI-улучшение описания
+- AI-рекомендация цены
 
-## Expanding the ESLint configuration
+> Важно: AI-рекомендация цены — это именно **оценка на основе данных карточки**, а не доступ к реальному рынку в реальном времени.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Стек
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- React Router DOM
+- TanStack Query
+- Axios
+- React Hook Form
+- Zod
+- Zustand
+- ESLint + Prettier
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Архитектура
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Проект организован в стиле **FSD, но прагматично**:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- `app` — инициализация приложения, роутинг, провайдеры
+- `pages` — страницы
+- `widgets` — крупные UI-блоки страниц
+- `features` — пользовательские сценарии
+- `entities` — доменная сущность объявления
+- `shared` — переиспользуемая инфраструктура, утилиты и базовые UI-компоненты
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Принятые правила:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- shadcn-компоненты лежат только в `shared/ui`
+- внешние импорты между слайсами — только через public API (`index.ts`)
+- бизнес-компоненты не выносятся в `shared/ui`
+- AI интегрирован напрямую из frontend в локальный Ollama
+- отдельный backend для AI не используется
+
+## Структура проекта
+
+```txt
+src/
+  app/
+  pages/
+  widgets/
+  features/
+  entities/
+  shared/# Avito AI Assistant
+
+Тестовое задание на frontend-стажировку Avito (весенняя волна 2026).
+
+Приложение представляет собой личный кабинет продавца с AI-помощником для улучшения объявлений: пользователь может просматривать список своих объявлений, открывать карточку, редактировать её и получать AI-рекомендации для описания и цены.
+
+## Что умеет приложение
+
+Основной сценарий:
+
+- список объявлений `/ads`
+- просмотр объявления `/ads/:id`
+- редактирование объявления `/ads/:id/edit`
+- редирект `/` → `/ads`
+- поиск, фильтрация, сортировка, пагинация
+- сохранение изменений объявления
+- сохранение черновика в `localStorage`
+- AI-улучшение описания
+- AI-рекомендация цены
+
+> Важно: AI-рекомендация цены — это именно **оценка на основе данных карточки**, а не доступ к реальному рынку в реальном времени.
+
+## Стек
+
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- React Router DOM
+- TanStack Query
+- Axios
+- React Hook Form
+- Zod
+- Zustand
+- ESLint + Prettier
+
+## Архитектура
+
+Проект организован в стиле **FSD, но прагматично**:
+
+- `app` — инициализация приложения, роутинг, провайдеры
+- `pages` — страницы
+- `widgets` — крупные UI-блоки страниц
+- `features` — пользовательские сценарии
+- `entities` — доменная сущность объявления
+- `shared` — переиспользуемая инфраструктура, утилиты и базовые UI-компоненты
+
+Принятые правила:
+
+- shadcn-компоненты лежат только в `shared/ui`
+- внешние импорты между слайсами — только через public API (`index.ts`)
+- бизнес-компоненты не выносятся в `shared/ui`
+- AI интегрирован напрямую из frontend в локальный Ollama
+- отдельный backend для AI не используется
 ```
