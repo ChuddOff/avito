@@ -1,11 +1,7 @@
 import axios, { type CreateAxiosDefaults } from "axios";
-import { env } from "./env";
-
-const BASE_URL = env.BASE_URL;
 
 const option: CreateAxiosDefaults = {
-  baseURL: BASE_URL,
-  withCredentials: true,
+  baseURL: "http://localhost:8080",
 };
 
 export const http = axios.create(option);
