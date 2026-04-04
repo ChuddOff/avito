@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
@@ -25,6 +25,9 @@ import {
   type EditAdFormValues,
 } from "../model/edit-ad-form.schema";
 import { getEditAdFormDefaultValues } from "../lib/get-edit-ad-form-default-values";
+import { useImproveDescriptionMutation } from "@/feature/improve-description";
+import { useSuggestPriceMutation } from "@/feature/suggest-price";
+import { buildAiInputFromFormValues } from "../lib";
 
 type Props = {
   ad: AdItemDto;
@@ -48,6 +51,8 @@ export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
     handleSubmit,
     reset,
     watch,
+    getValues,
+    setValue,
     formState: { errors, isValid },
   } = form;
 
@@ -63,6 +68,71 @@ export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
     }
   >;
 
+  const [descriptionSuggestion, setDescriptionSuggestion] = useState<{
+    suggestion: string;
+    rationale?: string;
+  } | null>(null);
+
+  const [priceSuggestion, setPriceSuggestion] = useState<{
+    suggestedPrice: number;
+    rationale: string;
+    confidence?: "low" | "medium" | "high";
+  } | null>(null);
+
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const { mutateAsync: improveDescription, isPending: isImprovingDescription } =
+    useImproveDescriptionMutation();
+
+  const { mutateAsync: suggestPrice, isPending: isSuggestingPrice } =
+    useSuggestPriceMutation();
+
+  const handleImproveDescription = async () => {
+    setAiError(null);
+
+    try {
+      const input = buildAiInputFromFormValues(getValues());
+      const result = await improveDescription(input);
+      setDescriptionSuggestion(result);
+    } catch (error) {
+      setAiError(
+        error instanceof Error ? error.message : "Не удалось улучшить описание",
+      );
+    }
+  };
+
+  const handleSuggestPrice = async () => {
+    setAiError(null);
+
+    try {
+      const input = buildAiInputFromFormValues(getValues());
+      const result = await suggestPrice(input);
+      setPriceSuggestion(result);
+    } catch (error) {
+      setAiError(
+        error instanceof Error ? error.message : "Не удалось получить цену",
+      );
+    }
+  };
+
+  const handleApplyDescription = () => {
+    if (!descriptionSuggestion) return;
+
+    setValue("description", descriptionSuggestion.suggestion, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
+  const handleApplyPrice = () => {
+    if (!priceSuggestion) return;
+
+    setValue("price", String(priceSuggestion.suggestedPrice), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
       <section className="flex flex-col gap-4">
@@ -70,7 +140,7 @@ export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
           Редактирование объявления
         </h1>
 
-        <div className="max-w-[280px] space-y-2">
+        <div className="max-w-70 space-y-2">
           <Label htmlFor="category">Категория</Label>
 
           <Controller
@@ -129,10 +199,37 @@ export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
               />
             </div>
 
-            <Button type="button" variant="outline" disabled>
-              Узнать рыночную цену
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isSuggestingPrice}
+              onClick={handleSuggestPrice}
+            >
+              {isSuggestingPrice ? "Оцениваем..." : "Узнать рыночную цену"}
             </Button>
           </div>
+
+          {priceSuggestion ? (
+            <div className="rounded-xl border bg-muted/30 p-3 text-sm">
+              <p className="font-medium">
+                Рекомендация: {priceSuggestion.suggestedPrice} ₽
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                {priceSuggestion.rationale}
+              </p>
+              {priceSuggestion.confidence ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Уверенность: {priceSuggestion.confidence}
+                </p>
+              ) : null}
+
+              <div className="mt-3">
+                <Button type="button" size="sm" onClick={handleApplyPrice}>
+                  Применить цену
+                </Button>
+              </div>
+            </div>
+          ) : null}
 
           {errors.price ? (
             <p className="text-sm text-destructive">{errors.price.message}</p>
@@ -217,14 +314,44 @@ export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
           />
 
           <div className="flex items-center justify-between gap-3">
-            <Button type="button" variant="outline" disabled>
-              Улучшить описание
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isImprovingDescription}
+              onClick={handleImproveDescription}
+            >
+              {isImprovingDescription ? "Генерируем..." : "Улучшить описание"}
             </Button>
 
             <p className="text-sm text-muted-foreground">
               {descriptionValue.length} / 1000
             </p>
           </div>
+
+          {descriptionSuggestion ? (
+            <div className="rounded-xl border bg-muted/30 p-3 text-sm">
+              <p className="font-medium">Предложение</p>
+              <p className="mt-1 whitespace-pre-wrap">
+                {descriptionSuggestion.suggestion}
+              </p>
+
+              {descriptionSuggestion.rationale ? (
+                <p className="mt-2 text-muted-foreground">
+                  {descriptionSuggestion.rationale}
+                </p>
+              ) : null}
+
+              <div className="mt-3">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleApplyDescription}
+                >
+                  Применить описание
+                </Button>
+              </div>
+            </div>
+          ) : null}
 
           {errors.description ? (
             <p className="text-sm text-destructive">
@@ -233,6 +360,8 @@ export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
           ) : null}
         </div>
       </section>
+
+      {aiError ? <p className="text-sm text-destructive">{aiError}</p> : null}
 
       <section className="flex items-center gap-3">
         <Button type="submit" disabled={!isValid || isSubmitting}>
