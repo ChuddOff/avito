@@ -2,12 +2,25 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@config "../tailwind.config.ts";
+
+@theme {
+  --breakpoint-mobile: 22.5rem; /* 360px */
+  --breakpoint-mini-tablet: 35.5rem; /* 568px */
+  --breakpoint-xs: 36rem; /* 576px */
+  --breakpoint-tablet: 48rem; /* 768px */
+  --breakpoint-sm: 62rem; /* 992px */
+  --breakpoint-md: 75rem; /* 1200px */
+  --breakpoint-lg: 90rem; /* 1440px */
+  --breakpoint-xl: 120rem; /* 1920px */
+}
 
 @custom-variant dark (&:is(.dark *));
 :root {
+  --gray: #848388;
   --text: #6b6375;
   --text-h: #08060d;
-  --bg: #fff;
+  --bg: #f7f5f8;
   --border: oklch(0.922 0 0);
   --code-bg: #f4f3ec;
   --accent: oklch(0.97 0 0);
@@ -18,8 +31,7 @@
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
-  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --heading: Static/Title Large/Font --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
@@ -35,7 +47,7 @@
     font-size: 16px;
   }
 
-  --background: oklch(1 0 0);
+  --background: #f7f5f8;
 
   --foreground: oklch(0.145 0 0);
 
@@ -93,7 +105,7 @@
 
   --sidebar-border: oklch(0.922 0 0);
 
-  --sidebar-ring: oklch(0.708 0 0)
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -136,17 +148,11 @@ h1,
 h2 {
   font-family: var(--heading);
   font-weight: 500;
-  color: var(--text-h);
+  color: black;
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: 24px;
 }
 h2 {
   font-size: 24px;
@@ -178,7 +184,7 @@ code {
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-sans: "Geist Variable", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -223,7 +229,7 @@ code {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
+  --card-foreground: oklch(33.923% 0.10745 24.943);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
@@ -251,12 +257,100 @@ code {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --gray: #848388;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;}
+    @apply border-border outline-ring/50;
+  }
   body {
-    @apply bg-background text-foreground;}
+    @apply bg-background text-foreground;
+  }
   html {
-    @apply font-sans;}}
+    @apply font-sans;
+  }
+  .text-h-0 {
+    @apply font-unbounded text-[23px] leading-[27.6px] font-medium tablet:text-[32px] tablet:leading-[38.4px] md:text-[45px] md:leading-[54px];
+  }
+
+  .text-h-1 {
+    @apply font-unbounded font-medium text-[22px] leading-[120%];
+  }
+
+  .text-h-2 {
+    @apply font-unbounded text-[20px] leading-[24.8px] md:text-[24px] md:leading-[28.56px];
+  }
+
+  .text-h-3 {
+    @apply font-unbounded leading-[125%] text-[14px] md:text-[16px];
+  }
+
+  .text-h-4 {
+    @apply font-manrope text-[16px] font-semibold leading-[21.86px] md:text-[18px] md:leading-[24.59px];
+  }
+
+  /* Основной текст */
+  .text-based {
+    @apply font-manrope text-[14px] leading-[135%] md:text-[16px] md:leading-[21.86px];
+  }
+
+  /* Жирный основной текст */
+  .text-bold-based {
+    @apply font-manrope font-semibold text-[14px] md:text-[16px];
+  }
+
+  /* Для подписей */
+  .text-for-sign {
+    @apply font-manrope text-[18px] leading-[135%] text-gray;
+  }
+
+  /* Для кнопок и инпутов */
+  .text-for-btns-inputs {
+    @apply font-manrope text-[16px] leading-[135%];
+  }
+
+  /* Полужирный для кнопок и инпутов */
+  .text-semibold-for-btns-inputs {
+    @apply font-manrope font-semibold text-[16px] leading-[135%];
+  }
+
+  /* Маленький для кнопок и инпутов */
+  .text-sm-for-btns-inputs {
+    @apply font-manrope text-[12px] leading-[135%];
+  }
+
+  /* Для заголовков на странице О нас */
+  .text-title-about {
+    @apply font-unbounded text-[23px] leading-[120%] tablet:text-[32px] md:text-[42px];
+  }
+
+  /* Для подписи на странице О нас */
+  .text-subtitle-about {
+    @apply font-manrope text-[16px] leading-[140%] tablet:text-[20px] md:text-[24px];
+  }
+
+  .text-for-statuses {
+    @apply font-manrope text-sm leading-none font-normal;
+  }
+
+  .text-alert {
+    @apply font-manrope text-[14px] leading-[135%] text-error;
+  }
+
+  .text-for-tags {
+    @apply font-manrope text-[14px] md:text-[16px] font-normal;
+  }
+
+  .text-dialog-prompt {
+    @apply font-manrope font-normal text-[16px] leading-[21.86px] tracking-[0px] text-secondary text-center w-full;
+  }
+
+  .truncate-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+}

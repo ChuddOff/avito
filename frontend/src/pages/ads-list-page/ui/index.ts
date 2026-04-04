@@ -1,1 +1,1 @@
-export * from "./ads-list-page";
+export * from "./ad-list-page";
