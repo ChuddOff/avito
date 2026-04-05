@@ -1,7 +1,7 @@
 import axios, { type CreateAxiosDefaults } from "axios";
 
 const option: CreateAxiosDefaults = {
-  baseURL: "http://localhost:8080",
+  baseURL: "https://avito-jvbe.vercel.app",
 };
 
 export const http = axios.create(option);
