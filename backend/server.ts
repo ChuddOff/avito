@@ -1,11 +1,11 @@
 import Fastify from "fastify";
-
-import items from "data/items.json" with { type: "json" };
-import { Item } from "src/types.ts";
-import { ItemsGetInQuerySchema, ItemUpdateInSchema } from "src/validation.ts";
-import { treeifyError, ZodError } from "zod";
-import { doesItemNeedRevision } from "./src/utils.js";
 import fastifyCors from "@fastify/cors";
+import { treeifyError, ZodError } from "zod";
+
+import items from "./data/items.json" with { type: "json" };
+import type { Item } from "./src/types.js";
+import { ItemsGetInQuerySchema, ItemUpdateInSchema } from "./src/validation.js";
+import { doesItemNeedRevision } from "./src/utils.js";
 
 const ITEMS = items as Item[];
 
