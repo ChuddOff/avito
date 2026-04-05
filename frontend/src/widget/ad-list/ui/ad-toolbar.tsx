@@ -21,6 +21,8 @@ type Props = {
   sortValue: string;
   onSearchValueChange: (value: string) => void;
   onSortChange: (value: string) => void;
+  layout: "grid" | "list";
+  onLayoutChange: (layout: "grid" | "list") => void;
 };
 
 export function AdsToolbar({
@@ -29,6 +31,8 @@ export function AdsToolbar({
   sortValue,
   onSearchValueChange,
   onSortChange,
+  layout,
+  onLayoutChange,
 }: Props) {
   return (
     <header className="flex flex-col gap-4">
@@ -60,9 +64,19 @@ export function AdsToolbar({
 
         <div className="flex gap-4 w-65 ">
           <div className="flex p-2 bg-gray rounded-[8px] gap-[10px] h-[32px] items-center">
-            <LayoutGrid className="w-[18px] h-[18px]" />
+            <LayoutGrid
+              className={`w-[18px] h-[18px] cursor-pointer ${layout === "grid" ? "text-blue2" : "text-gray-text"}`}
+              onClick={() => {
+                layout === "list" && onLayoutChange("grid");
+              }}
+            />
             <div className="w-[2px] h-full bg-white" />
-            <List className="w-[18px] h-[18px]" />
+            <List
+              className={`w-[18px] h-[18px] cursor-pointer ${layout === "list" ? "text-blue2" : "text-gray-text"}`}
+              onClick={() => {
+                layout === "grid" && onLayoutChange("list");
+              }}
+            />
           </div>
           <Select value={sortValue} onValueChange={onSortChange}>
             <SelectTrigger

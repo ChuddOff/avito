@@ -1,14 +1,15 @@
 import type { AdAllDto } from "@/entities/ad/api/dto";
-import { AdCard } from "@/entities/ad/ui";
+import { AdCard, AdRowCard } from "@/entities/ad/ui";
 
 type Props = {
   items: AdAllDto[];
   isPending: boolean;
   isError: boolean;
   error: unknown;
+  layout: "grid" | "list";
 };
 
-export function AdsList({ items, isPending, isError, error }: Props) {
+export function AdsList({ items, isPending, isError, error, layout }: Props) {
   if (isPending) {
     return (
       <div className="rounded-[16px] bg-white p-6 text-sm text-muted-foreground">
@@ -39,10 +40,19 @@ export function AdsList({ items, isPending, isError, error }: Props) {
 
   return (
     <section aria-label="Список объявлений" className="min-w-0">
-      <ul role="list" className="grid gap-3 grid-cols-5">
+      <ul
+        role="list"
+        className={
+          layout === "grid" ? "grid gap-3 grid-cols-5" : "flex flex-col gap-3"
+        }
+      >
         {items.map((item) => (
           <li key={item.id}>
-            <AdCard item={item} />
+            {layout === "grid" ? (
+              <AdCard item={item} />
+            ) : (
+              <AdRowCard item={item} />
+            )}
           </li>
         ))}
       </ul>

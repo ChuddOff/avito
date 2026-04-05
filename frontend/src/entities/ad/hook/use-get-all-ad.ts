@@ -7,7 +7,7 @@ import { useGetAllAd } from "../api/get-all-ad";
 /**
  * Выполняется запрос при изменении контекста
  */
-export function useGetAllAdCatalog() {
+export function useGetAllAdCatalog(per_p?: number) {
   const filterCtx = useContext(AdFilterContext);
   const paginationCtx = useContext(AdPaginationContext);
 
@@ -22,7 +22,7 @@ export function useGetAllAdCatalog() {
   }
 
   const page = paginationCtx.page;
-  const per_page = paginationCtx.per_page;
+  const per_page = per_p ?? paginationCtx.per_page;
 
   const limit = per_page;
   const skip = (page - 1) * per_page;

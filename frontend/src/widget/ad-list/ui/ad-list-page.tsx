@@ -7,6 +7,7 @@ import { AdsFilters } from "./ad-filters";
 import { AdsList } from "./ad-list";
 
 export function AdsListPage() {
+  const [layout, setLayout] = useState<"grid" | "list">("grid");
   const {
     data,
     isPending,
@@ -25,7 +26,7 @@ export function AdsListPage() {
     setSortColumn,
     setSortDirection,
     setPage,
-  } = useGetAllAdCatalog();
+  } = useGetAllAdCatalog(layout === "grid" ? 10 : 4);
 
   const [searchValue, setSearchValue] = useState(q ?? "");
 
@@ -98,6 +99,8 @@ export function AdsListPage() {
         sortValue={sortValue}
         onSearchValueChange={setSearchValue}
         onSortChange={handleSortChange}
+        layout={layout}
+        onLayoutChange={setLayout}
       />
 
       <div className="grid gap-6 grid-cols-[256px_minmax(0,1fr)]">
@@ -115,10 +118,11 @@ export function AdsListPage() {
             isPending={isPending}
             isError={isError}
             error={error}
+            layout={layout}
           />
 
           {!isPending && !isError && items.length > 0 ? (
-            <MePaginationListServices />
+            <MePaginationListServices layout={layout} />
           ) : null}
         </div>
       </div>
