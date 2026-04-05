@@ -18,8 +18,6 @@ const SelectTrigger = React.forwardRef<
     iconClassName?: string;
   }
 >(({ className, iconClassName, children, error, ...props }, ref) => {
-  const [isOpened, setIsOpened] = React.useState<boolean>(false);
-
   return (
     <SelectPrimitive.Trigger
       ref={ref}

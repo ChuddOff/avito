@@ -5,7 +5,6 @@ import { Badge } from "@/shared/ui";
 
 import { getCategoryLabel } from "../lib/get-category-label";
 import type { AdAllDto } from "../api/dto";
-import { Dot } from "lucide-react";
 
 const PLACEHOLDER_IMAGE = "/photo.png";
 
