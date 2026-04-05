@@ -22,7 +22,7 @@ fastify.use((_, __, next) =>
 
 // Настройка CORS
 await fastify.register(fastifyCors, {
-  origin: "http://localhost:5173",
+  origin: "https://avito-alpha.vercel.app",
   methods: ["GET", "POST", "PUT", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
 });
