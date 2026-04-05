@@ -1,16 +1,19 @@
 import { z } from "zod";
 
+const positiveNumberString = z
+  .string()
+  .trim()
+  .min(1, "Цена должна быть заполнена")
+  .refine((value) => Number.isFinite(Number(value)), "Цена должна быть числом")
+  .refine((value) => Number(value) > 0, "Цена должна быть больше нуля");
+
 export const editAdFormSchema = z.object({
   category: z.enum(["auto", "real_estate", "electronics"]),
   title: z.string().trim().min(1, "Название должно быть заполнено"),
-  price: z
-    .string()
-    .trim()
-    .min(1, "Цена должна быть заполнена")
-    .refine((value) => !Number.isNaN(Number(value)), "Цена должна быть числом")
-    .refine((value) => Number(value) > 0, "Цена должна быть больше нуля"),
+  price: positiveNumberString,
   description: z
     .string()
+    .trim()
     .max(1000, "Описание не должно превышать 1000 символов"),
   params: z.object({
     brand: z.string().optional(),

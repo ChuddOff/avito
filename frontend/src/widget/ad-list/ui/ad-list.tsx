@@ -39,10 +39,7 @@ export function AdsList({ items, isPending, isError, error }: Props) {
 
   return (
     <section aria-label="Список объявлений" className="min-w-0">
-      <ul
-        role="list"
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-      >
+      <ul role="list" className="grid gap-3 grid-cols-5">
         {items.map((item) => (
           <li key={item.id}>
             <AdCard item={item} />

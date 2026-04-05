@@ -30,7 +30,7 @@ export const PaginationList = ({
         {/*Предыдущая*/}
         <PaginationItem>
           <PaginationPrevious
-            disable={page + add_page === 1}
+            disable={page === 1}
             onClick={() => onClick(page + add_page - 1)}
           />
         </PaginationItem>
@@ -93,7 +93,7 @@ export const PaginationList = ({
           {/* Поставить троеточие, если уже конец */}
           {page + add_page < last - 2 && last > 3 ? (
             <PaginationItem>
-              <PaginationEllipsis />
+              <PaginationEllipsis className="h-full" />
             </PaginationItem>
           ) : null}
 

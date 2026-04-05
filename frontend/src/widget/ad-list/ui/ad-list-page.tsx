@@ -100,7 +100,7 @@ export function AdsListPage() {
         onSortChange={handleSortChange}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[256px_minmax(0,1fr)]">
+      <div className="grid gap-6 grid-cols-[256px_minmax(0,1fr)]">
         <AdsFilters
           categories={categories as unknown as AdCategory[]}
           needsRevision={needsRevision}

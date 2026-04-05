@@ -5,20 +5,18 @@ import { Slot } from "radix-ui";
 import { cn } from "../lib";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-[12px] font-manrope text-[16px] ring-offset-background" +
-    "transition-colors duration-150 disabled:pointer-events-none",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-[12px] font-manrope text-[16px] ring-offset-background " +
+    "transition-colors duration-150 disabled:pointer-events-none cursor-pointer",
   {
     variants: {
       variant: {
-        default:
-          "bg-white text-black border-2 border-stroke hover:border-stroke-hover active:border-active",
+        default: "bg-white text-black cursor-pointer border-white border-[4px]",
         black:
-          "bg-black border-0 border-black text-white hover:bg-button-hoverBlack active:bg-button-pressedBlack",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "bg-black border-0 border-black text-white hover:bg-gray active:bg-button-pressedBlack",
+        outline: "border border-input bg-background cursor-pointer",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         noborder: "border-0 text-black bg-transparent",
         danger: "bg-error text-white",

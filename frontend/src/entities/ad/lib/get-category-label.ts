@@ -1,7 +1,7 @@
 import type { AdCategory } from "../api";
 
 const CATEGORY_LABELS: Record<AdCategory, string> = {
-  auto: "Транспорт",
+  auto: "Авто",
   real_estate: "Недвижимость",
   electronics: "Электроника",
 };

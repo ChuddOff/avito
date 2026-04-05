@@ -14,3 +14,5 @@ export * from "./separator";
 export * from "./select";
 export * from "./accordion";
 export * from "./pagination";
+export * from "./form";
+export * from "./popover";

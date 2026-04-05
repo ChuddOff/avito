@@ -1,8 +1,17 @@
 import type { AdCategory } from "@/entities/ad";
-import { Button, Checkbox, Separator, Switch } from "@/shared/ui";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  Button,
+  Checkbox,
+  Separator,
+  Switch,
+} from "@/shared/ui";
 
 const CATEGORY_OPTIONS: Array<{ value: AdCategory; label: string }> = [
-  { value: "auto", label: "Транспорт" },
+  { value: "auto", label: "Авто" },
   { value: "real_estate", label: "Недвижимость" },
   { value: "electronics", label: "Электроника" },
 ];
@@ -23,37 +32,51 @@ export function AdsFilters({
   onReset,
 }: Props) {
   return (
-    <aside aria-label="Фильтры объявлений" className="flex flex-col gap-2.5">
-      <section className="flex flex-col gap-4 rounded-[16px] bg-white p-4">
-        <h2 className="text-base font-medium">Фильтры</h2>
+    <aside
+      aria-label="Фильтры объявлений"
+      className="flex flex-col  justify-start  gap-2.5"
+    >
+      <section className="flex flex-col justify-start gap-2.5 rounded-[16px] bg-gray p-4 ">
+        <h2 className="text-start text-h-2">Фильтры</h2>
 
-        <fieldset className="flex flex-col gap-3">
-          <legend className="text-sm font-medium">Категории</legend>
+        <Accordion type="multiple">
+          <AccordionItem
+            value="12"
+            className="flex flex-col justify-start gap-2"
+          >
+            <AccordionTrigger className="text-start">
+              Категории
+            </AccordionTrigger>
+            <AccordionContent>
+              {CATEGORY_OPTIONS.map((category) => {
+                const checked = categories.includes(category.value);
 
-          {CATEGORY_OPTIONS.map((category) => {
-            const checked = categories.includes(category.value);
+                return (
+                  <label
+                    key={category.value}
+                    className="flex items-center gap-3 text-sm"
+                  >
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(value) =>
+                        onToggleCategory(category.value, Boolean(value))
+                      }
+                    />
+                    <span>{category.label}</span>
+                  </label>
+                );
+              })}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
-            return (
-              <label
-                key={category.value}
-                className="flex items-center gap-3 text-sm"
-              >
-                <Checkbox
-                  checked={checked}
-                  onCheckedChange={(value) =>
-                    onToggleCategory(category.value, Boolean(value))
-                  }
-                />
-                <span>{category.label}</span>
-              </label>
-            );
-          })}
-        </fieldset>
-
-        <Separator />
+        <Separator className="border-white2 bg-white2" />
 
         <div className="flex items-center justify-between gap-3">
-          <label htmlFor="needs-revision" className="text-sm leading-5">
+          <label
+            htmlFor="needs-revision"
+            className="text-bold-based text-start"
+          >
             Только требующие доработок
           </label>
 
@@ -61,11 +84,17 @@ export function AdsFilters({
             id="needs-revision"
             checked={needsRevision}
             onCheckedChange={onToggleNeedsRevision}
+            className="h-[22px] w-[44px] bg-gray-button"
+            classNameThumb="w-[18px] h-[18px]"
           />
         </div>
       </section>
 
-      <Button type="button" variant="outline" onClick={onReset}>
+      <Button
+        type="button"
+        className="text-based bg-gray text-gray-text2"
+        onClick={onReset}
+      >
         Сбросить фильтры
       </Button>
     </aside>

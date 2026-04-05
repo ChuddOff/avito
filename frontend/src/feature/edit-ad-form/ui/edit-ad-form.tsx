@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
+import { Lightbulb } from "lucide-react";
 
 import {
   adCategoryOptions,
@@ -10,6 +11,11 @@ import {
 } from "@/entities/ad";
 import {
   Button,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
   Input,
   Label,
   Select,
@@ -17,6 +23,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Separator,
   Textarea,
 } from "@/shared/ui";
 
@@ -28,45 +35,60 @@ import { getEditAdFormDefaultValues } from "../lib/get-edit-ad-form-default-valu
 import { useImproveDescriptionMutation } from "@/feature/improve-description";
 import { useSuggestPriceMutation } from "@/feature/suggest-price";
 import { buildAiInputFromFormValues } from "../lib";
+import { AiResponsePopover } from "./ai-response-popover";
 
 type Props = {
   ad: AdItemDto;
   onSubmit: (values: EditAdFormValues) => void | Promise<void>;
   isSubmitting?: boolean;
+  isEditPending?: boolean;
 };
 
 type ParamKey = keyof EditAdFormValues["params"] & string;
 type ParamFieldName = `params.${ParamKey}`;
 
-export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
+export function EditAdForm({
+  ad,
+  onSubmit,
+  isSubmitting = false,
+  isEditPending,
+}: Props) {
   const form = useForm<EditAdFormValues>({
     resolver: zodResolver(editAdFormSchema),
     mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: getEditAdFormDefaultValues(ad),
   });
 
   const {
-    register,
     control,
     handleSubmit,
     reset,
     watch,
     getValues,
     setValue,
-    formState: { errors, isValid },
+    formState: { isValid, errors },
   } = form;
 
   useEffect(() => {
     reset(getEditAdFormDefaultValues(ad));
+    setDescriptionSuggestion(null);
+    setPriceSuggestion(null);
+    setAiError(null);
   }, [ad, reset]);
 
   const selectedCategory = watch("category");
   const descriptionValue = watch("description") ?? "";
+
   const dynamicFields = adEditFieldConfigByCategory[selectedCategory] as Array<
     (typeof adEditFieldConfigByCategory)[keyof typeof adEditFieldConfigByCategory][number] & {
       name: ParamKey;
     }
   >;
+
+  const [isDescriptionPopoverOpen, setIsDescriptionPopoverOpen] =
+    useState(false);
+  const [isPricePopoverOpen, setIsPricePopoverOpen] = useState(false);
 
   const [descriptionSuggestion, setDescriptionSuggestion] = useState<{
     suggestion: string;
@@ -92,8 +114,11 @@ export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
 
     try {
       const input = buildAiInputFromFormValues(getValues());
+      console.log(input);
+
       const result = await improveDescription(input);
       setDescriptionSuggestion(result);
+      setIsDescriptionPopoverOpen(true);
     } catch (error) {
       setAiError(
         error instanceof Error ? error.message : "Не удалось улучшить описание",
@@ -108,6 +133,7 @@ export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
       const input = buildAiInputFromFormValues(getValues());
       const result = await suggestPrice(input);
       setPriceSuggestion(result);
+      setIsPricePopoverOpen(true);
     } catch (error) {
       setAiError(
         error instanceof Error ? error.message : "Не удалось получить цену",
@@ -122,6 +148,8 @@ export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
       shouldDirty: true,
       shouldValidate: true,
     });
+
+    setIsDescriptionPopoverOpen(false);
   };
 
   const handleApplyPrice = () => {
@@ -131,247 +159,338 @@ export function EditAdForm({ ad, onSubmit, isSubmitting = false }: Props) {
       shouldDirty: true,
       shouldValidate: true,
     });
+
+    setIsPricePopoverOpen(false);
   };
 
+  useEffect(() => {
+    reset(getEditAdFormDefaultValues(ad));
+    setDescriptionSuggestion(null);
+    setPriceSuggestion(null);
+    setAiError(null);
+    setIsDescriptionPopoverOpen(false);
+    setIsPricePopoverOpen(false);
+  }, [ad, reset]);
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
-      <section className="flex flex-col gap-4">
-        <h1 className="text-3xl font-semibold text-foreground">
-          Редактирование объявления
-        </h1>
+    <Form {...form}>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4.5">
+        <section className="flex flex-col gap-4.5">
+          <h1 className="text-h-0 text-start">Редактирование объявления</h1>
 
-        <div className="max-w-70 space-y-2">
-          <Label htmlFor="category">Категория</Label>
-
-          <Controller
+          <FormField
             control={control}
             name="category"
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger id="category" className="w-full">
-                  <SelectValue placeholder="Выберите категорию" />
-                </SelectTrigger>
+              <FormItem className="max-w-70 space-y-2">
+                <Label htmlFor="category" className="text-based">
+                  Категория
+                </Label>
 
-                <SelectContent>
-                  {adCategoryOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      id="category"
+                      className="w-full h-8 min-h-8 border-1 border-gray2"
+                      iconClassName="text-gray2"
+                    >
+                      <SelectValue placeholder="Выберите категорию" />
+                    </SelectTrigger>
+
+                    <SelectContent className="border-1 border-gray2">
+                      {adCategoryOptions.map((option) => (
+                        <SelectItem
+                          className="!text-[14px]"
+                          key={option.value}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
             )}
           />
-        </div>
-      </section>
+        </section>
 
-      <section className="flex flex-col gap-5 border-t pt-6">
-        <div className="space-y-2">
-          <Label htmlFor="title">
-            <span className="text-destructive">*</span> Название
-          </Label>
+        <Separator className="bg-white2" />
 
-          <Input
-            id="title"
-            placeholder="Введите название объявления"
-            aria-invalid={Boolean(errors.title)}
-            {...register("title")}
+        <section className="flex flex-col gap-4.5">
+          <FormField
+            control={control}
+            name="title"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <Label htmlFor="title" className="text-based">
+                  <span className="text-destructive">*</span> Название
+                </Label>
+
+                <FormControl>
+                  <Input
+                    id="title"
+                    placeholder="Введите название объявления"
+                    divClassName="max-w-[456px] w-full"
+                    className="h-8 min-h-8 bg-white"
+                    aria-invalid={Boolean(errors.title)}
+                    {...field}
+                    value={field.value ?? ""}
+                    needDelete
+                  />
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
-          {errors.title ? (
-            <p className="text-sm text-destructive">{errors.title.message}</p>
-          ) : null}
-        </div>
+          <Separator className="bg-white2" />
 
-        <div className="space-y-2">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
-            <div className="w-full max-w-[320px] space-y-2">
-              <Label htmlFor="price">
-                <span className="text-destructive">*</span> Цена
-              </Label>
+          <FormField
+            control={control}
+            name="price"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <div className="flex gap-3 items-end">
+                  <div className="space-y-2 max-w-[456px] w-full">
+                    <Label htmlFor="price" className="text-based">
+                      <span className="text-destructive">*</span> Цена
+                    </Label>
 
-              <Input
-                id="price"
-                type="number"
-                placeholder="Введите цену"
-                aria-invalid={Boolean(errors.price)}
-                {...register("price")}
-              />
-            </div>
+                    <FormControl>
+                      <Input
+                        id="price"
+                        type="number"
+                        placeholder="Введите цену"
+                        divClassName="max-w-[456px] w-full"
+                        className="h-8 min-h-8 bg-white"
+                        aria-invalid={Boolean(errors.price)}
+                        {...field}
+                        value={field.value ?? ""}
+                        needDelete
+                      />
+                    </FormControl>
+                  </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isSuggestingPrice}
-              onClick={handleSuggestPrice}
-            >
-              {isSuggestingPrice ? "Оцениваем..." : "Узнать рыночную цену"}
-            </Button>
-          </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isSuggestingPrice}
+                    onClick={handleSuggestPrice}
+                    className="h-8 min-h-8 border-0 bg-alert text-alert-text flex gap-2.5 cursor-pointer"
+                  >
+                    <Lightbulb className="w-[14px] h-[14px]" />
+                    <p className="text-h-4">
+                      {isSuggestingPrice
+                        ? "Оцениваем..."
+                        : "Узнать рыночную цену"}
+                    </p>
+                  </Button>
+                </div>
 
-          {priceSuggestion ? (
-            <div className="rounded-xl border bg-muted/30 p-3 text-sm">
-              <p className="font-medium">
-                Рекомендация: {priceSuggestion.suggestedPrice} ₽
-              </p>
-              <p className="mt-1 text-muted-foreground">
-                {priceSuggestion.rationale}
-              </p>
-              {priceSuggestion.confidence ? (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Уверенность: {priceSuggestion.confidence}
-                </p>
-              ) : null}
+                {priceSuggestion ? (
+                  <AiResponsePopover
+                    open={isPricePopoverOpen}
+                    onOpenChange={setIsPricePopoverOpen}
+                    title="Ответ AI:"
+                    content={`${priceSuggestion.suggestedPrice} ₽\n\n${priceSuggestion.rationale}${priceSuggestion.confidence ? `\n\nУверенность: ${priceSuggestion.confidence}` : ""}`}
+                    onApply={handleApplyPrice}
+                    onRetry={handleSuggestPrice}
+                    applyText="Применить"
+                  />
+                ) : null}
 
-              <div className="mt-3">
-                <Button type="button" size="sm" onClick={handleApplyPrice}>
-                  Применить цену
-                </Button>
-              </div>
-            </div>
-          ) : null}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </section>
 
-          {errors.price ? (
-            <p className="text-sm text-destructive">{errors.price.message}</p>
-          ) : null}
-        </div>
-      </section>
+        <Separator className="bg-white2" />
 
-      <section className="flex flex-col gap-5 border-t pt-6">
-        <h2 className="text-xl font-semibold text-foreground">
-          Характеристики
-        </h2>
+        <section className="flex flex-col gap-5">
+          <h2 className="text-based text-start">Характеристики</h2>
 
-        <div className="grid gap-5 md:grid-cols-2">
-          {dynamicFields.map((field) => {
-            const fieldName = `params.${field.name}` as ParamFieldName;
-            const error = errors.params?.[field.name];
+          <div className="flex flex-col gap-3 ">
+            {dynamicFields.map((config) => {
+              const fieldName = `params.${config.name}` as ParamFieldName;
 
-            if (field.type === "select") {
-              return (
-                <div key={field.name} className="space-y-2">
-                  <Label htmlFor={field.name}>{field.label}</Label>
-
-                  <Controller
+              if (config.type === "select") {
+                return (
+                  <FormField
+                    key={config.name}
                     control={control}
                     name={fieldName}
-                    render={({ field: controllerField }) => (
-                      <Select
-                        value={controllerField.value ?? ""}
-                        onValueChange={controllerField.onChange}
-                      >
-                        <SelectTrigger id={field.name} className="w-full">
-                          <SelectValue placeholder={field.placeholder} />
-                        </SelectTrigger>
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <Label
+                          htmlFor={config.name}
+                          className="text-h-4 !text-[14px] !font-normal"
+                        >
+                          {config.label}
+                        </Label>
 
-                        <SelectContent>
-                          {field.options?.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <FormControl>
+                          <Select
+                            value={field.value || undefined}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger
+                              id={config.name}
+                              className="w-full border-1 border-gray2 h-8 min-h-8 max-w-[456px] w-full"
+                            >
+                              <SelectValue placeholder={config.placeholder} />
+                            </SelectTrigger>
+
+                            <SelectContent className="border-1 border-gray2">
+                              {config.options?.map((option) => (
+                                <SelectItem
+                                  className="text-[14px]"
+                                  key={option.value}
+                                  value={option.value}
+                                >
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+
+                        <FormMessage />
+                      </FormItem>
                     )}
                   />
+                );
+              }
 
-                  {error ? (
-                    <p className="text-sm text-destructive">{error.message}</p>
-                  ) : null}
-                </div>
-              );
-            }
+              return (
+                <FormField
+                  key={config.name}
+                  control={control}
+                  name={fieldName}
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <Label
+                        htmlFor={config.name}
+                        className="text-h-4 !text-[14px] !font-normal"
+                      >
+                        {config.label}
+                      </Label>
 
-            return (
-              <div key={field.name} className="space-y-2">
-                <Label htmlFor={field.name}>{field.label}</Label>
+                      <FormControl>
+                        <Input
+                          id={config.name}
+                          type={config.type}
+                          placeholder={config.placeholder}
+                          aria-invalid={Boolean(
+                            form.formState.errors.params?.[config.name],
+                          )}
+                          className="bg-white h-8 min-h-8"
+                          divClassName="max-w-[456px] w-full"
+                          {...field}
+                          value={field.value ?? ""}
+                          needDelete
+                        />
+                      </FormControl>
 
-                <Input
-                  id={field.name}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  aria-invalid={Boolean(error)}
-                  {...register(fieldName)}
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-
-                {error ? (
-                  <p className="text-sm text-destructive">{error.message}</p>
-                ) : null}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-4 border-t pt-6">
-        <h2 className="text-xl font-semibold text-foreground">Описание</h2>
-
-        <div className="space-y-2">
-          <Textarea
-            rows={6}
-            placeholder="Введите описание"
-            {...register("description")}
-          />
-
-          <div className="flex items-center justify-between gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isImprovingDescription}
-              onClick={handleImproveDescription}
-            >
-              {isImprovingDescription ? "Генерируем..." : "Улучшить описание"}
-            </Button>
-
-            <p className="text-sm text-muted-foreground">
-              {descriptionValue.length} / 1000
-            </p>
+              );
+            })}
           </div>
+        </section>
 
-          {descriptionSuggestion ? (
-            <div className="rounded-xl border bg-muted/30 p-3 text-sm">
-              <p className="font-medium">Предложение</p>
-              <p className="mt-1 whitespace-pre-wrap">
-                {descriptionSuggestion.suggestion}
-              </p>
+        <Separator className="bg-white2" />
 
-              {descriptionSuggestion.rationale ? (
-                <p className="mt-2 text-muted-foreground">
-                  {descriptionSuggestion.rationale}
-                </p>
-              ) : null}
+        <section className="flex flex-col gap-4">
+          <h2 className="text-based text-start">Описание</h2>
 
-              <div className="mt-3">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleApplyDescription}
-                >
-                  Применить описание
-                </Button>
-              </div>
-            </div>
-          ) : null}
+          <FormField
+            control={control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <div className="flex flex-col">
+                  <FormControl>
+                    <Textarea
+                      rows={6}
+                      placeholder="Введите описание"
+                      className="max-w-[942px] w-full"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
 
-          {errors.description ? (
-            <p className="text-sm text-destructive">
-              {errors.description.message}
-            </p>
-          ) : null}
-        </div>
-      </section>
+                  <p className="text-h-4 text-gray2 text-end max-w-[942px]">
+                    {descriptionValue.length}/1000
+                  </p>
+                </div>
 
-      {aiError ? <p className="text-sm text-destructive">{aiError}</p> : null}
+                <div className="flex items-center justify-between gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isImprovingDescription}
+                    onClick={handleImproveDescription}
+                    className="h-8 min-h-8 border-0 bg-alert text-alert-text flex gap-2.5"
+                  >
+                    <Lightbulb className="w-[14px] h-[14px]" />
+                    <p className="text-h-4">
+                      {isImprovingDescription
+                        ? "Генерируем..."
+                        : "Улучшить описание"}
+                    </p>
+                  </Button>
+                </div>
 
-      <section className="flex items-center gap-3">
-        <Button type="submit" disabled={!isValid || isSubmitting}>
-          Сохранить
-        </Button>
+                {descriptionSuggestion ? (
+                  <AiResponsePopover
+                    open={isDescriptionPopoverOpen}
+                    onOpenChange={setIsDescriptionPopoverOpen}
+                    title="Ответ AI:"
+                    content={
+                      descriptionSuggestion.rationale
+                        ? `${descriptionSuggestion.suggestion}\n\n${descriptionSuggestion.rationale}`
+                        : descriptionSuggestion.suggestion
+                    }
+                    onApply={handleApplyDescription}
+                    onRetry={handleImproveDescription}
+                    applyText="Применить"
+                  />
+                ) : null}
 
-        <Button asChild type="button" variant="secondary">
-          <Link to={`/ads/${ad.id}`}>Отменить</Link>
-        </Button>
-      </section>
-    </form>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </section>
+
+        {aiError ? <p className="text-sm text-destructive">{aiError}</p> : null}
+
+        <section className="flex items-center gap-3">
+          <Button
+            type="submit"
+            className="bg-blue2 text-white h-[38px] border-0 "
+            disabled={!isValid || isSubmitting}
+          >
+            {isEditPending ? "Сохраняем..." : "Сохранить"}
+          </Button>
+
+          <Button
+            asChild
+            type="button"
+            variant="secondary"
+            className="bg-gray2 text-gray-text3 h-[38px] border-0"
+          >
+            <Link to={`/ads/${ad.id}`}>Отменить</Link>
+          </Button>
+        </section>
+      </form>
+    </Form>
   );
 }

@@ -5,13 +5,23 @@ import {
   type EditAdFormValues,
 } from "@/feature/edit-ad-form";
 import { AdEditPanel } from "@/widget/ad-edit-panel";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export function AdEditPage() {
+  const navigate = useNavigate();
   const params = useParams<{ id: string }>();
   const id = params.id;
 
-  const { mutate: editAd } = useEditAd({ id: id ?? "" });
+  const { mutate: editAd, isPending: isEditPending } = useEditAd(
+    {
+      id: id ?? "",
+    },
+    {
+      onSuccess() {
+        navigate(`/ads/${id}`);
+      },
+    },
+  );
 
   const { data, isPending, isError, error } = useGetAdById({ id: id ?? "" });
 
@@ -56,5 +66,11 @@ export function AdEditPage() {
     );
   }
 
-  return <AdEditPanel ad={data} onSubmit={handleSubmit} />;
+  return (
+    <AdEditPanel
+      ad={data}
+      onSubmit={handleSubmit}
+      isEditPending={isEditPending}
+    />
+  );
 }

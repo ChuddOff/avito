@@ -5,6 +5,7 @@ import { Item } from "src/types.ts";
 import { ItemsGetInQuerySchema, ItemUpdateInSchema } from "src/validation.ts";
 import { treeifyError, ZodError } from "zod";
 import { doesItemNeedRevision } from "./src/utils.js";
+import fastifyCors from "@fastify/cors";
 
 const ITEMS = items as Item[];
 
@@ -20,9 +21,10 @@ fastify.use((_, __, next) =>
 );
 
 // Настройка CORS
-fastify.use((_, reply, next) => {
-  reply.setHeader("Access-Control-Allow-Origin", "*");
-  next();
+await fastify.register(fastifyCors, {
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
 });
 
 interface ItemGetRequest extends Fastify.RequestGenericInterface {
@@ -87,8 +89,8 @@ fastify.get<ItemsGetRequest>("/items", (request) => {
   });
 
   return {
-    items: filteredItems
-      .toSorted((item1, item2) => {
+    items: [...filteredItems]
+      .sort((item1, item2) => {
         let comparisonValue = 0;
 
         if (!sortDirection) return comparisonValue;

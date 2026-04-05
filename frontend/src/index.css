@@ -17,7 +17,19 @@
 
 @custom-variant dark (&:is(.dark *));
 :root {
-  --gray: #848388;
+  --alert-text: #faad14;
+  --black2: #1e1e1e;
+  --alert: #f9f1e6;
+  --alert2: #ffa940;
+  --blue2: #1890ff;
+  --blue-input: #40a9ff;
+  --gray-text: #707176;
+  --gray-text2: #848388;
+  --gray-text3: #5a5a5a;
+  --gray: #f4f4f6;
+  --gray2: #d9d9d9;
+  --gray-button: #bfbfbf;
+  --white2: #f0f0f0;
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #f7f5f8;
@@ -30,6 +42,7 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
+  --font-roboto: Roboto;
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
   --heading: Static/Title Large/Font --mono: ui-monospace, Consolas, monospace;
 
@@ -129,11 +142,10 @@
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -151,20 +163,33 @@ h2 {
   color: black;
 }
 
-h1 {
-  font-size: 24px;
-}
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
 }
 p {
   margin: 0;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.input-autofill-reset:-webkit-autofill,
+.input-autofill-reset:-webkit-autofill:hover,
+.input-autofill-reset:-webkit-autofill:focus,
+.input-autofill-reset:-webkit-autofill:active {
+  -webkit-text-fill-color: #000 !important;
+  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+  box-shadow: 0 0 0 1000px #fff inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: #000;
 }
 
 code,
@@ -257,21 +282,20 @@ code {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-  --gray: #848388;
+  --gray: #f4f4f6;
+  --gray-text: #707176;
+  --gray-text2: #848388;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white text-foreground;
   }
   html {
     @apply font-sans;
   }
   .text-h-0 {
-    @apply font-unbounded text-[23px] leading-[27.6px] font-medium tablet:text-[32px] tablet:leading-[38.4px] md:text-[45px] md:leading-[54px];
+    @apply text-3xl font-medium text-black leading-[40px];
   }
 
   .text-h-1 {
@@ -279,30 +303,30 @@ code {
   }
 
   .text-h-2 {
-    @apply font-unbounded text-[20px] leading-[24.8px] md:text-[24px] md:leading-[28.56px];
+    @apply font-roboto text-[16px] leading-[24px] font-medium;
   }
 
   .text-h-3 {
-    @apply font-unbounded leading-[125%] text-[14px] md:text-[16px];
+    @apply font-heading leading-[28px] text-[28px] font-medium;
   }
 
   .text-h-4 {
-    @apply font-manrope text-[16px] font-semibold leading-[21.86px] md:text-[18px] md:leading-[24.59px];
+    @apply font-heading text-[14px] font-normal leading-[22px];
   }
 
   /* Основной текст */
   .text-based {
-    @apply font-manrope text-[14px] leading-[135%] md:text-[16px] md:leading-[21.86px];
+    @apply font-heading text-[14px] leading-[22px] font-normal;
   }
 
   /* Жирный основной текст */
   .text-bold-based {
-    @apply font-manrope font-semibold text-[14px] md:text-[16px];
+    @apply font-heading text-[14px] leading-[22px] font-semibold text-black2;
   }
 
   /* Для подписей */
   .text-for-sign {
-    @apply font-manrope text-[18px] leading-[135%] text-gray;
+    @apply font-manrope text-[18px] leading-[135%] text-gray-text2;
   }
 
   /* Для кнопок и инпутов */

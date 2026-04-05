@@ -10,17 +10,15 @@ export function AdParamsList({ category, params }: Props) {
   const entries = getAdParamEntries(category, params);
 
   if (!entries.length) {
-    return (
-      <p className="text-sm text-muted-foreground">Характеристики не указаны</p>
-    );
+    return <p className=" text-based text-start">Характеристики не указаны</p>;
   }
 
   return (
-    <dl className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-2 text-sm">
+    <dl className="grid grid-cols-[160px_1fr] gap-x-6 gap-y-2 text-sm ">
       {entries.map((entry) => (
         <div key={entry.key} className="contents">
-          <dt className="text-muted-foreground">{entry.label}</dt>
-          <dd className="text-foreground">{entry.value}</dd>
+          <dt className="text-bold-based text-gray-text2">{entry.label}</dt>
+          <dd className="text-based text-black2">{entry.value}</dd>
         </div>
       ))}
     </dl>

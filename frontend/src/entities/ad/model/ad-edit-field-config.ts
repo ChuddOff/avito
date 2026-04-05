@@ -138,6 +138,6 @@ export const adCategoryOptions: Array<{
   label: string;
 }> = [
   { value: "electronics", label: "Электроника" },
-  { value: "auto", label: "Транспорт" },
+  { value: "auto", label: "Авто" },
   { value: "real_estate", label: "Недвижимость" },
 ];

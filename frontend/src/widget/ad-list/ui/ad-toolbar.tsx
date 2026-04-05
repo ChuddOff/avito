@@ -6,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui";
+import { LayoutGrid, List } from "lucide-react";
 
 const SORT_OPTIONS = [
   { value: "createdAt:desc", label: "Сначала новые" },
@@ -38,33 +39,47 @@ export function AdsToolbar({
 
       <section
         aria-label="Поиск и сортировка объявлений"
-        className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"
+        className="flex gap-6 overflow-hidden p-3 bg-white rounded-[16px] justify-between border border-white2"
       >
         <form
           role="search"
-          className="w-full max-w-xl"
+          className="w-full flex-1"
           onSubmit={(e) => e.preventDefault()}
         >
           <Input
             value={searchValue}
             onChange={(e) => onSearchValueChange(e.target.value)}
+            divClassName="max-h-[32px] min-h-[32px] max-w-full flex-1"
+            className="max-h-[32px] min-h-[32px] max-w-full flex-1"
             placeholder="Найти объявление..."
             aria-label="Поиск по названию объявления"
+            onSearch={() => onSearchValueChange(searchValue)}
+            needSearch
           />
         </form>
 
-        <div className="w-full lg:w-65">
+        <div className="flex gap-4 w-65 ">
+          <div className="flex p-2 bg-gray rounded-[8px] gap-[10px] h-[32px] items-center">
+            <LayoutGrid className="w-[18px] h-[18px]" />
+            <div className="w-[2px] h-full bg-white" />
+            <List className="w-[18px] h-[18px]" />
+          </div>
           <Select value={sortValue} onValueChange={onSortChange}>
             <SelectTrigger
               aria-label="Сортировка объявлений"
-              className="w-full"
+              className="w-full h-[32px]"
+              iconClassName="text-gray-text"
             >
               <SelectValue placeholder="Сортировка" />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className="border border-white2">
               {SORT_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem
+                  className="!text-[14px]"
+                  key={option.value}
+                  value={option.value}
+                >
                   {option.label}
                 </SelectItem>
               ))}

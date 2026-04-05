@@ -5,12 +5,23 @@ type Props = {
   ad: AdItemDto;
   onSubmit: (values: EditAdFormValues) => void | Promise<void>;
   isSubmitting?: boolean;
+  isEditPending?: boolean;
 };
 
-export function AdEditPanel({ ad, onSubmit, isSubmitting = false }: Props) {
+export function AdEditPanel({
+  ad,
+  onSubmit,
+  isSubmitting = false,
+  isEditPending,
+}: Props) {
   return (
-    <main className="rounded-2xl border bg-white p-6 shadow-sm">
-      <EditAdForm ad={ad} onSubmit={onSubmit} isSubmitting={isSubmitting} />
+    <main className="bg-white py-5 max-w-[1103px]">
+      <EditAdForm
+        ad={ad}
+        onSubmit={onSubmit}
+        isSubmitting={isSubmitting}
+        isEditPending={isEditPending}
+      />
     </main>
   );
 }

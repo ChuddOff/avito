@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { cn } from "@/shared/lib";
-import { Eye, EyeOff } from "lucide-react";
+import { CircleX, Eye, EyeOff, Search } from "lucide-react";
 import { Button } from "./button";
 import clsx from "clsx";
 import InputModule from "../styles/input.module.css";
@@ -10,8 +10,11 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   error?: boolean;
   errorText?: string;
   needCounter?: boolean;
+  needSearch?: boolean;
   divClassName?: string;
   necessarily?: boolean;
+  onSearch?: () => void;
+  needDelete?: boolean;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -23,10 +26,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       errorText,
       placeholder,
       needCounter,
+      needSearch,
+      needDelete,
       onChange,
       minLength = 3,
       maxLength = 150,
       necessarily = true,
+      onSearch,
       divClassName,
       ...props
     },
@@ -52,7 +58,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div
         className={clsx(
-          "flex flex-col w-full  relative remove-number",
+          "flex flex-col w-full justify-center relative remove-number",
           divClassName,
         )}
       >
@@ -60,9 +66,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           onChange={onChangeHandler}
           type={type}
           className={cn(
-            "select-text flex min-h-[48px] w-full rounded-[12px] border-2 border-stroke bg-background px-3 py-2 text-[16px]" +
-              " placeholder:text-inactive focus-visible:border-stroke-active focus-visible:outline-0  transition-colors hover:border-stroke-hover" +
-              " duration-150 disabled:cursor-not-allowed disabled:opacity-50 outline-none",
+            "input-autofill-reset relative select-text flex min-h-[48px] w-full rounded-[8px] bg-background px-3 py-2 text-[14px] border border-gray2 " +
+              "text-black placeholder:text-gray-text focus-visible:border-blue-input focus-visible:ring-2 focus-visible:ring-[#1890FF33] transition-colors " +
+              "duration-150 disabled:cursor-not-allowed disabled:opacity-50 outline-none",
             className,
             error
               ? "border-error hover:border-error focus-visible:border-error"
@@ -72,6 +78,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           {...props}
         />
+        {needDelete && count > 0 && (
+          <CircleX
+            className="w-[14px] h-[14px] absolute right-3 cursor-pointer text-gray-text"
+            onClick={() => {
+              onChange?.({ target: { value: "" } } as any);
+              setCount(0);
+            }}
+          />
+        )}
+        {needSearch && (
+          <Search
+            className="w-[14px] h-[14px] absolute right-3 cursor-pointer text-gray-text"
+            onClick={() => onSearch?.()}
+          />
+        )}
+
         {needCounter ? (
           <div className="flex justify-between">
             <span
