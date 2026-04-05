@@ -303,7 +303,7 @@ code {
   }
 
   .text-h-2 {
-    @apply font-roboto text-[16px] leading-[24px] font-medium;
+    @apply font-heading text-[16px] leading-[24px] font-medium;
   }
 
   .text-h-3 {

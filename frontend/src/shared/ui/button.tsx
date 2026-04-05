@@ -21,7 +21,7 @@ const buttonVariants = cva(
         noborder: "border-0 text-black bg-transparent",
         danger: "bg-error text-white",
         active: "bg-progress font-semibold",
-        disabled: "text-stroke border-stroke border-2 cursor-default",
+        disabled: " cursor-default",
         "blue-link": "text-primary underline-offset-4 text-blue-links",
       },
       size: {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, LoaderCircle, RefreshCw } from "lucide-react";
 
 import {
   adCategoryOptions,
@@ -18,6 +18,8 @@ import {
   FormMessage,
   Input,
   Label,
+  Popover,
+  PopoverAnchor,
   Select,
   SelectContent,
   SelectItem,
@@ -114,7 +116,6 @@ export function EditAdForm({
 
     try {
       const input = buildAiInputFromFormValues(getValues());
-      console.log(input);
 
       const result = await improveDescription(input);
       setDescriptionSuggestion(result);
@@ -171,6 +172,18 @@ export function EditAdForm({
     setIsDescriptionPopoverOpen(false);
     setIsPricePopoverOpen(false);
   }, [ad, reset]);
+
+  const hasDescription = descriptionValue.trim().length > 0;
+  const hasSuggestion = Boolean(descriptionSuggestion);
+  const isLoadingDescription = isImprovingDescription;
+
+  const hasPriceSuggestion = Boolean(priceSuggestion);
+
+  const priceButtonState = isSuggestingPrice
+    ? "loading"
+    : hasPriceSuggestion
+      ? "retry"
+      : "default";
 
   return (
     <Form {...form}>
@@ -274,34 +287,49 @@ export function EditAdForm({
                       />
                     </FormControl>
                   </div>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isSuggestingPrice}
-                    onClick={handleSuggestPrice}
-                    className="h-8 min-h-8 border-0 bg-alert text-alert-text flex gap-2.5 cursor-pointer"
-                  >
-                    <Lightbulb className="w-[14px] h-[14px]" />
-                    <p className="text-h-4">
-                      {isSuggestingPrice
-                        ? "Оцениваем..."
-                        : "Узнать рыночную цену"}
-                    </p>
-                  </Button>
-                </div>
-
-                {priceSuggestion ? (
-                  <AiResponsePopover
+                  <Popover
                     open={isPricePopoverOpen}
                     onOpenChange={setIsPricePopoverOpen}
-                    title="Ответ AI:"
-                    content={`${priceSuggestion.suggestedPrice} ₽\n\n${priceSuggestion.rationale}${priceSuggestion.confidence ? `\n\nУверенность: ${priceSuggestion.confidence}` : ""}`}
-                    onApply={handleApplyPrice}
-                    onRetry={handleSuggestPrice}
-                    applyText="Применить"
-                  />
-                ) : null}
+                  >
+                    <PopoverAnchor asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isSuggestingPrice}
+                        onClick={handleSuggestPrice}
+                        className="h-8 min-h-8 border-0 bg-alert text-alert-text flex gap-2.5 cursor-pointer disabled:text-alert-text"
+                      >
+                        {priceButtonState === "loading" ? (
+                          <>
+                            <LoaderCircle className="w-[14px] h-[14px] animate-spin" />
+                            <p className="text-h-4">Генерируем...</p>
+                          </>
+                        ) : priceButtonState === "retry" ? (
+                          <>
+                            <RefreshCw className="w-[14px] h-[14px]" />
+                            <p className="text-h-4">Повторить запрос</p>
+                          </>
+                        ) : (
+                          <>
+                            <Lightbulb className="w-[14px] h-[14px]" />
+                            <p className="text-h-4">Узнать рыночную цену</p>
+                          </>
+                        )}
+                      </Button>
+                    </PopoverAnchor>
+                    {priceSuggestion ? (
+                      <AiResponsePopover
+                        open={isPricePopoverOpen}
+                        onOpenChange={setIsPricePopoverOpen}
+                        title="Ответ AI:"
+                        content={`${priceSuggestion.suggestedPrice} ₽\n\n${priceSuggestion.rationale}${priceSuggestion.confidence ? `\n\nУверенность: ${priceSuggestion.confidence}` : ""}`}
+                        onApply={handleApplyPrice}
+                        onRetry={handleSuggestPrice}
+                        applyText="Применить"
+                      />
+                    ) : null}
+                  </Popover>
+                </div>
 
                 <FormMessage />
               </FormItem>
@@ -340,7 +368,7 @@ export function EditAdForm({
                           >
                             <SelectTrigger
                               id={config.name}
-                              className="w-full border-1 border-gray2 h-8 min-h-8 max-w-[456px] w-full"
+                              className={`w-full border-1 border-gray2 h-8 min-h-8 max-w-[456px] w-full ${!!form.getValues(fieldName)?.length ? "" : "!border-1 !border-alert2"}`}
                             >
                               <SelectValue placeholder={config.placeholder} />
                             </SelectTrigger>
@@ -388,7 +416,7 @@ export function EditAdForm({
                           aria-invalid={Boolean(
                             form.formState.errors.params?.[config.name],
                           )}
-                          className="bg-white h-8 min-h-8"
+                          className={`bg-white h-8 min-h-8 ${!!form.getValues(fieldName)?.length ? "" : "!border-1 !border-alert2"} max-w-[456px] w-full`}
                           divClassName="max-w-[456px] w-full"
                           {...field}
                           value={field.value ?? ""}
@@ -420,7 +448,11 @@ export function EditAdForm({
                     <Textarea
                       rows={6}
                       placeholder="Введите описание"
-                      className="max-w-[942px] w-full"
+                      className={`max-w-[942px] w-full ${
+                        descriptionValue.trim().length === 0
+                          ? "!border !border-alert2"
+                          : ""
+                      }`}
                       {...field}
                       value={field.value ?? ""}
                     />
@@ -432,37 +464,58 @@ export function EditAdForm({
                 </div>
 
                 <div className="flex items-center justify-between gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isImprovingDescription}
-                    onClick={handleImproveDescription}
-                    className="h-8 min-h-8 border-0 bg-alert text-alert-text flex gap-2.5"
-                  >
-                    <Lightbulb className="w-[14px] h-[14px]" />
-                    <p className="text-h-4">
-                      {isImprovingDescription
-                        ? "Генерируем..."
-                        : "Улучшить описание"}
-                    </p>
-                  </Button>
-                </div>
-
-                {descriptionSuggestion ? (
-                  <AiResponsePopover
+                  <Popover
                     open={isDescriptionPopoverOpen}
                     onOpenChange={setIsDescriptionPopoverOpen}
-                    title="Ответ AI:"
-                    content={
-                      descriptionSuggestion.rationale
-                        ? `${descriptionSuggestion.suggestion}\n\n${descriptionSuggestion.rationale}`
-                        : descriptionSuggestion.suggestion
-                    }
-                    onApply={handleApplyDescription}
-                    onRetry={handleImproveDescription}
-                    applyText="Применить"
-                  />
-                ) : null}
+                  >
+                    <PopoverAnchor asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isImprovingDescription}
+                        onClick={handleImproveDescription}
+                        className="h-8 min-h-8 border-0 bg-alert text-alert-text flex gap-2.5 disabled:text-alert-text"
+                      >
+                        {isLoadingDescription ? (
+                          <>
+                            <LoaderCircle className="w-[14px] h-[14px] animate-spin" />
+                            <p className="text-h-4">Генерируем...</p>
+                          </>
+                        ) : hasSuggestion ? (
+                          <>
+                            <RefreshCw className="w-[14px] h-[14px]" />
+                            <p className="text-h-4">Повторить запрос</p>
+                          </>
+                        ) : hasDescription ? (
+                          <>
+                            <Lightbulb className="w-[14px] h-[14px]" />
+                            <p className="text-h-4">Улучшить описание</p>
+                          </>
+                        ) : (
+                          <>
+                            <Lightbulb className="w-[14px] h-[14px]" />
+                            <p className="text-h-4">Придумать описание</p>
+                          </>
+                        )}
+                      </Button>
+                    </PopoverAnchor>
+                    {descriptionSuggestion ? (
+                      <AiResponsePopover
+                        open={isDescriptionPopoverOpen}
+                        onOpenChange={setIsDescriptionPopoverOpen}
+                        title="Ответ AI:"
+                        content={
+                          descriptionSuggestion.rationale
+                            ? `${descriptionSuggestion.suggestion}\n\n${descriptionSuggestion.rationale}`
+                            : descriptionSuggestion.suggestion
+                        }
+                        onApply={handleApplyDescription}
+                        onRetry={handleImproveDescription}
+                        applyText="Применить"
+                      />
+                    ) : null}
+                  </Popover>
+                </div>
 
                 <FormMessage />
               </FormItem>
@@ -475,7 +528,7 @@ export function EditAdForm({
         <section className="flex items-center gap-3">
           <Button
             type="submit"
-            className="bg-blue2 text-white h-[38px] border-0 "
+            className="bg-blue2 text-white h-[38px] border-0 disabled:text-white disabled:bg-gray2"
             disabled={!isValid || isSubmitting}
           >
             {isEditPending ? "Сохраняем..." : "Сохранить"}

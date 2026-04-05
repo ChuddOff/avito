@@ -5,6 +5,7 @@ import { Badge } from "@/shared/ui";
 
 import { getCategoryLabel } from "../lib/get-category-label";
 import type { AdAllDto } from "../api/dto";
+import { useGetAdById } from "../api";
 
 const PLACEHOLDER_IMAGE = "/photo.png";
 
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function AdCard({ item }: Props) {
+  const { data } = useGetAdById({ id: item.id.toString() ?? "" });
   return (
     <article className="overflow-hidden rounded-[16px] bg-white h-full border border-white2">
       <Link to={`/ads/${item.id}`} className="flex h-full flex-col">
@@ -35,7 +37,11 @@ export function AdCard({ item }: Props) {
             {formatPrice(item.price)} ₽
           </p>
 
-          {item.needsRevision ? (
+          {!data?.category ||
+          !data.description ||
+          !data.price ||
+          !data.params ||
+          !data.title ? (
             <Badge
               variant="secondary"
               className="w-fit mt-auto flex gap-2 h-[26px]"

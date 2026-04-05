@@ -21,10 +21,7 @@ export function AdView({ ad }: { ad: AdItemDto }) {
         <div className="flex flex-col gap-3">
           <h1 className="text-h-0">{ad.title}</h1>
 
-          <Button
-            asChild
-            className="bg-blue2 border-blue2 hover:bg-white hover:text-blue2 max-h-[38px]"
-          >
+          <Button asChild className="bg-blue2 border-blue2  max-h-[38px]">
             <Link
               to={`/ads/${ad.id}/edit`}
               className="text-based text-white flex gap-2 w-min  px-3 py-2"
@@ -86,7 +83,7 @@ export function AdView({ ad }: { ad: AdItemDto }) {
         <h3 className="text-h-3 text-black text-start">Описание</h3>
 
         <p className="max-w-2xl text-based text-start">
-          {ad.description?.trim() ? ad.description : "Описание не указано"}
+          {ad.description?.trim() ? ad.description : "Отсутствует"}
         </p>
       </section>
     </main>
