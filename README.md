@@ -1,6 +1,6 @@
-### ИИ В СЕРВИСЕ НЕ РАБОТАЕТ БЕЗ VPN
+# ИИ В СЕРВИСЕ НЕ РАБОТАЕТ БЕЗ VPN
 
-# Avito AI Assistant
+## Avito AI Assistant
 
 Тестовое задание на frontend-стажировку Avito (весенняя волна 2026).
 
